@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:task_app/pages/home.dart';
+import 'package:task_app/pages/login.dart';
 
 class AuthService {
   // Método para criação de conta
@@ -93,5 +94,19 @@ class AuthService {
         fontSize: 14.0
       );
     }
+  }
+
+  Future<void> signout({
+    required BuildContext context
+  }) async {
+    
+    await FirebaseAuth.instance.signOut();
+    await Future.delayed(const Duration(seconds: 1));
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) =>Login()
+        )
+      );
   }
 }
