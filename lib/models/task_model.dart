@@ -1,10 +1,28 @@
-class Task {
-  String id; // ID único da tarefa (pode ser o id do documento no Firebase)
-  String uid; // ID do usuário (vinculado ao Firebase Auth)
+import 'package:hive/hive.dart';
+
+part 'task_model.g.dart'; // será gerado
+
+@HiveType(typeId: 0)
+class Task extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String uid;
+
+  @HiveField(2)
   String titulo;
+
+  @HiveField(3)
   String descricao;
+
+  @HiveField(4)
   DateTime dataCriacao;
+
+  @HiveField(5)
   bool concluida;
+
+  @HiveField(6)
   bool favorita;
 
   Task({
@@ -16,30 +34,4 @@ class Task {
     this.concluida = false,
     this.favorita = false,
   });
-
-  // Converter para Map (para salvar no Firebase)
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'uid': uid,
-      'titulo': titulo,
-      'descricao': descricao,
-      'dataCriacao': dataCriacao.toIso8601String(),
-      'concluida': concluida,
-      'favorita': favorita,
-    };
-  }
-
-  // Criar a partir de Map (para recuperar do Firebase)
-  factory Task.fromMap(Map<String, dynamic> map) {
-    return Task(
-      id: map['id'] ?? '',
-      uid: map['uid'] ?? '',
-      titulo: map['titulo'] ?? '',
-      descricao: map['descricao'] ?? '',
-      dataCriacao: DateTime.parse(map['dataCriacao']),
-      concluida: map['concluida'] ?? false,
-      favorita: map['favorita'] ?? false,
-    );
-  }
 }
