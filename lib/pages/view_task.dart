@@ -59,46 +59,67 @@ class _ViewTaskState extends State<ViewTask> {
     }
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const Home()),
-                    );
-                  },
-                ),
-              ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top,
             ),
-            Text(
-              widget.taskId == null ? 'Nova Tarefa' : 'Editar Tarefa',
-              style: GoogleFonts.raleway(
-                textStyle: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 32,
-                ),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const Home()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.taskId == null
+                              ? 'Nova Tarefa'
+                              : 'Editar Tarefa',
+                          style: GoogleFonts.raleway(
+                            textStyle: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 32,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 80),
+                        _titulo(),
+                        const SizedBox(height: 20),
+                        _descricao(),
+                        const SizedBox(height: 50),
+                        Row(
+                          children: [
+                            Expanded(child: _salvar(context)),
+                            const SizedBox(width: 16),
+                            if (widget.taskId != null) _delete(context),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 80),
-            _titulo(),
-            const SizedBox(height: 20),
-            _descricao(),
-            const SizedBox(height: 50),
-            Row(
-              children: [
-                Expanded(child: _salvar(context)),
-                const SizedBox(width: 16),
-                if (widget.taskId != null) _delete(context), // só mostra se estiver editando
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
     );

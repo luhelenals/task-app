@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:task_app/pages/home.dart';
 import 'package:task_app/pages/login.dart';
 import 'package:task_app/utils/snackbar_helper.dart';

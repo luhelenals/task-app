@@ -29,18 +29,6 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => ViewTask()
-            )
-          );
-        },
-        backgroundColor: const Color(0xff0D6EFD),
-        child: const Icon(Icons.add),
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -74,15 +62,15 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _logout(),
-                  const SizedBox(width: 10),
                   _filterFavorites(),
-                  const SizedBox(width: 10),
                   _filterComplete(),
-                  const SizedBox(width: 10),
-                  _showAllTasks()
-              ],)
+                  _showAllTasks(),
+                  _addTask(),
+                ],
+              ),
             ],
           ),
         ),
@@ -174,6 +162,20 @@ class _HomeState extends State<Home> {
         });
       },
     );
+  }
+
+  Widget _addTask() {
+    return IconButton(
+      onPressed: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => ViewTask()
+          )
+        );
+      },
+      icon: const Icon(Icons.add, color: Colors.black)
+      );
   }
 
   Widget _buildTaskCard(Task task) {
