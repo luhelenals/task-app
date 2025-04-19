@@ -15,7 +15,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final TaskService _taskService = TaskService();
-
+  List<Task>? _filteredTasks;
+  bool _isFiltered = false;
   late final String uid;
 
   @override
@@ -30,7 +31,6 @@ class _HomeState extends State<Home> {
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Navegar para a tela de criação de tarefa
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -62,7 +62,7 @@ class _HomeState extends State<Home> {
                       return const Center(child: Text('Nenhuma tarefa encontrada.'));
                     }
 
-                    final tasks = snapshot.data!;
+                    final tasks = _isFiltered ? _filteredTasks! : snapshot.data!;
                     return ListView.builder(
                       itemCount: tasks.length,
                       itemBuilder: (context, index) {
@@ -73,6 +73,16 @@ class _HomeState extends State<Home> {
                   },
                 ),
               ),
+              Row(
+                children: [
+                  _logout(),
+                  const SizedBox(width: 10),
+                  _filterFavorites(),
+                  const SizedBox(width: 10),
+                  _filterComplete(),
+                  const SizedBox(width: 10),
+                  _showAllTasks()
+              ],)
             ],
           ),
         ),
@@ -85,47 +95,84 @@ class _HomeState extends State<Home> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Olá,',
-          style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+        Row(
+          children: [
+            Text(
+              'Olá,',
+              style: GoogleFonts.raleway(
+                textStyle: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          email,
-          style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+            const SizedBox(width: 8),
+            Text(
+              email,
+              style: GoogleFonts.raleway(
+                textStyle: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(height: 16),
-        _logout(),
       ],
     );
   }
 
   Widget _logout() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xff0D6EFD),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        minimumSize: const Size(double.infinity, 60),
-        elevation: 0,
-      ),
+    return IconButton(
+      icon: const Icon(Icons.logout, color: Colors.black,),
+      tooltip: "Sair",
       onPressed: () async {
         await AuthService().signout(context: context);
       },
-      child: const Text("Sair"),
+    );
+  }
+
+  Widget _showAllTasks() {
+    return IconButton(
+      icon: const Icon(Icons.list, color: Colors.black),
+      tooltip: "Todas",
+      onPressed: () async {
+        final favoriteTasks = await _taskService.getTasksByUser(uid);
+        setState(() {
+          _filteredTasks = favoriteTasks;
+          _isFiltered = true;
+        });
+      },
+    );
+  }
+
+  Widget _filterFavorites() {
+    return IconButton(
+      icon: const Icon(Icons.star, color: Colors.black),
+      tooltip: "Favoritas",
+      onPressed: () async {
+        final favoriteTasks = await _taskService.getFavoriteTasksByUser(uid);
+        setState(() {
+          _filteredTasks = favoriteTasks;
+          _isFiltered = true;
+        });
+      },
+    );
+  }
+
+  Widget _filterComplete() {
+    return IconButton(
+      icon: const Icon(Icons.check_circle, color: Colors.black),
+      tooltip: "Concluídas",
+      onPressed: () async {
+        final completeTasks = await _taskService.getCompleteTasksByUser(uid);
+        setState(() {
+          _filteredTasks = completeTasks;
+          _isFiltered = true;
+        });
+      },
     );
   }
 
@@ -137,16 +184,21 @@ class _HomeState extends State<Home> {
       child: ListTile(
         leading: Icon(
           task.concluida ? Icons.check_circle : Icons.circle_outlined,
-          color: task.concluida ? Colors.green : Colors.grey,
+          color: task.concluida ? Colors.black : Colors.grey,
         ),
         title: Text(task.titulo),
         subtitle: Text(task.descricao),
         trailing: Icon(
           task.favorita ? Icons.star : Icons.star_border,
-          color: task.favorita ? Colors.yellow[700] : Colors.grey,
+          color: task.favorita ? Colors.black : Colors.grey,
         ),
         onTap: () {
-          // TODO: Navegar para a tela de detalhes ou edição da tarefa
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => ViewTask(taskId: task.id)
+            )
+          );
         },
       ),
     );

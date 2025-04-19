@@ -13,6 +13,16 @@ class TaskService {
     return taskBox.values.where((task) => task.uid == uid).toList();
   }
 
+  Future<List<Task>> getFavoriteTasksByUser(String uid) async {
+    // Filtrando as tarefas pelo usuário
+    return taskBox.values.where((task) => task.uid == uid && task.favorita).toList();
+  }
+
+  Future<List<Task>> getCompleteTasksByUser(String uid) async {
+    // Filtrando as tarefas pelo usuário
+    return taskBox.values.where((task) => task.uid == uid && task.concluida).toList();
+  }
+
   Future<void> createTask({
     required BuildContext context,
     required String titulo,
