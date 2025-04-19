@@ -7,15 +7,25 @@ import 'package:task_app/utils/snackbar_helper.dart';
 class AuthService {
   // Método para criação de conta
   Future<void> signup({
+    required String name,
     required String email,
     required String password,
     required BuildContext context
   }) async {
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password
       );
+
+      // Atualiza o nome no perfil do Firebase
+      await userCredential.user!.updateDisplayName(name);
+
+      // Recarrega o usuário para garantir que o nome esteja disponível
+      await userCredential.user!.reload();
+
+      // Exibe mensagem ou redireciona
+      showSnackbar(context: context, message: 'Cadastro realizado com sucesso!');
       
       showDialog(
         context: context,

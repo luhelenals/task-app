@@ -8,6 +8,7 @@ import 'package:task_app/utils/button_helper.dart';
 class Signup extends StatelessWidget {
   Signup({super.key});
 
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -43,6 +44,8 @@ class Signup extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 80),
+                  _nome(),
+                  const SizedBox(height: 20),
                   _emailAddress(),
                   const SizedBox(height: 20),
                   _password(),
@@ -54,6 +57,43 @@ class Signup extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _nome() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nome',
+          style: GoogleFonts.raleway(
+            textStyle: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.normal,
+              fontSize: 16
+            )
+          ),
+        ),
+        const SizedBox(height: 16,),
+        TextField(
+          controller: _nameController,
+          decoration: InputDecoration(
+            filled: true,
+            hintText: 'Nome',
+            hintStyle: const TextStyle(
+              color: Color(0xff6A6A6A),
+              fontWeight: FontWeight.normal,
+              fontSize: 14
+            ),
+            fillColor: const Color(0xffF7F7F9) ,
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(14)
+            )
+          ),
+        )
+      ],
     );
   }
 
@@ -132,7 +172,8 @@ class Signup extends StatelessWidget {
        await AuthService().signup(
           email: _emailController.text,
           password: _passwordController.text,
-          context: context
+          context: context,
+          name: _nameController.text
         );
       },
       title: "Criar conta"

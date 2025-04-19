@@ -79,7 +79,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildHeader() {
-    final email = FirebaseAuth.instance.currentUser!.email!;
+    final name = FirebaseAuth.instance.currentUser!.displayName!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,7 +97,7 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(width: 8),
             Text(
-              email,
+              name,
               style: GoogleFonts.raleway(
                 textStyle: const TextStyle(
                   color: Colors.black,
