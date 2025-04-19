@@ -90,7 +90,13 @@ class _ViewTaskState extends State<ViewTask> {
             const SizedBox(height: 20),
             _descricao(),
             const SizedBox(height: 50),
-            _salvar(context),
+            Row(
+              children: [
+                Expanded(child: _salvar(context)),
+                const SizedBox(width: 16),
+                if (widget.taskId != null) _delete(context), // só mostra se estiver editando
+              ],
+            ),
             const SizedBox(height: 16),
           ],
         ),
@@ -139,6 +145,28 @@ class _ViewTaskState extends State<ViewTask> {
           ),
         ),
       );
+
+  Widget _delete(BuildContext context) {
+    return Expanded( // Para alinhar junto com o botão salvar
+      child: ElevatedButtonHelper(
+        title: "Apagar",
+        onPressed: () async {
+          if (widget.taskId == null) return;
+
+          final box = await Hive.openBox<Task>('tasks');
+
+          await box.delete(widget.taskId);
+
+          showSnackbar(message: "Tarefa apagada com sucesso!", context: context);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const Home()),
+          );
+        },
+      ),
+    );
+  }
 
   Widget _salvar(BuildContext context) {
     return ElevatedButtonHelper(
