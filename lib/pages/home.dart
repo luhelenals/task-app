@@ -7,6 +7,8 @@ import 'package:task_app/services/task_service.dart';
 import '../models/task_model.dart';
 import '../services/auth_service.dart';
 
+enum SortOption { title, creationDate }
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -15,6 +17,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  SortOption? _sortOption;
   final TaskService _taskService = TaskService();
   late Box<Task> taskBox = initTaskBox() as Box<Task>; 
   
@@ -88,13 +91,13 @@ class _HomeState extends State<Home> {
 
   Widget _buildHeader() {
     final name = FirebaseAuth.instance.currentUser!.displayName!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
             Text(
-              'Olá,',
+              'Olá, ',
               style: GoogleFonts.raleway(
                 textStyle: const TextStyle(
                   color: Colors.black,
@@ -103,7 +106,6 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
             Text(
               name,
               style: GoogleFonts.raleway(
@@ -113,6 +115,24 @@ class _HomeState extends State<Home> {
                   fontSize: 20,
                 ),
               ),
+            ),
+          ],
+        ),
+        PopupMenuButton<SortOption>(
+          icon: const Icon(Icons.sort, color: Colors.black),
+          tooltip: 'Ordenar tarefas',
+          onSelected: (SortOption selectedOption) async {
+            final tasks = await _taskService.getTasksByUser(uid);
+            _sortTasks(selectedOption, tasks);
+          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<SortOption>>[
+            const PopupMenuItem<SortOption>(
+              value: SortOption.title,
+              child: Text('Ordenar pelo título'),
+            ),
+            const PopupMenuItem<SortOption>(
+              value: SortOption.creationDate,
+              child: Text('Ordenar pela data de criação'),
             ),
           ],
         ),
@@ -234,5 +254,18 @@ class _HomeState extends State<Home> {
         },
       ),
     );
+  }
+
+  void _sortTasks(SortOption option, List<Task> tasks) {
+    setState(() {
+      _sortOption = option;
+      if (option == SortOption.title) {
+        tasks.sort((a, b) => a.titulo.toLowerCase().compareTo(b.titulo.toLowerCase()));
+      } else if (option == SortOption.creationDate) {
+        tasks.sort((a, b) => a.dataCriacao.compareTo(b.dataCriacao));
+      }
+      _filteredTasks = tasks;
+      _isFiltered = true;
+    });
   }
 }
