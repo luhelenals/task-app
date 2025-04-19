@@ -3,6 +3,7 @@ import 'package:task_app/services/auth_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:task_app/utils/button_helper.dart';
 
 class Signup extends StatelessWidget {
   Signup({super.key});
@@ -122,15 +123,7 @@ class Signup extends StatelessWidget {
   }
 
   Widget _signup(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xff0D6EFD),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          minimumSize: const Size(double.infinity, 60),
-          elevation: 0,
-      ),
+    return ElevatedButtonHelper(
       onPressed: () async {
        await AuthService().signup(
           email: _emailController.text,
@@ -138,7 +131,7 @@ class Signup extends StatelessWidget {
           context: context
         );
       },
-      child: const Text("Criar conta"),
+      title: "Criar conta"
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:task_app/pages/home.dart';
 import 'package:task_app/pages/login.dart';
+import 'package:task_app/utils/snackbar_helper.dart';
 
 class AuthService {
   // Método para criação de conta
@@ -44,14 +45,7 @@ class AuthService {
       } else {
         message = 'Erro: ${e.message}';
       }
-      Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.SNACKBAR,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 14.0
-      );
+      showSnackbar(message: message, isError: true, context: context);
     }
   }
 
@@ -85,14 +79,7 @@ class AuthService {
       } else {
         message = 'Erro ao autenticar: ${e.message}';
       }
-      Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.SNACKBAR,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 14.0
-      );
+      showSnackbar(message: message, isError: true, context: context);
     }
   }
 

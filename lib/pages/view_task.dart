@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:task_app/models/task_model.dart';
 import 'package:task_app/pages/home.dart';
-import 'package:task_app/services/task_service.dart';
+import 'package:task_app/utils/button_helper.dart';
+import 'package:task_app/utils/snackbar_helper.dart';
 import 'package:uuid/uuid.dart';
 
 class ViewTask extends StatefulWidget {
@@ -20,7 +20,6 @@ class ViewTask extends StatefulWidget {
 class _ViewTaskState extends State<ViewTask> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descricaoController = TextEditingController();
-  final TaskService _taskService = TaskService();
   final String uid = FirebaseAuth.instance.currentUser!.uid;
 
   bool isLoading = true;
@@ -142,53 +141,40 @@ class _ViewTaskState extends State<ViewTask> {
       );
 
   Widget _salvar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff0D6EFD),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          minimumSize: const Size(double.infinity, 60),
-          elevation: 0,
-        ),
-        onPressed: () async {
-          final box = await Hive.openBox<Task>('tasks');
+    return ElevatedButtonHelper(
+      onPressed: () async {
+        final box = await Hive.openBox<Task>('tasks');
 
-          if (widget.taskId == null) {
-            // Criar nova tarefa
-            final newTask = Task(
-              uid: FirebaseAuth.instance.currentUser!.uid,
-              id: const Uuid().v4(),
-              titulo: _tituloController.text,
-              descricao: _descricaoController.text,
-              dataCriacao: DateTime.now()
-            );
-
-            await box.put(newTask.id, newTask);
-          } else {
-            // Atualizar tarefa existente
-            final task = box.get(widget.taskId);
-            if (task != null) {
-              task.titulo = _tituloController.text;
-              task.descricao = _descricaoController.text;
-              await task.save();
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Tarefa atualizada com sucesso!")),
-              );
-            }
-          }
-
-          // Volta para Home
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const Home()),
+        if (widget.taskId == null) {
+          // Criar nova tarefa
+          final newTask = Task(
+            uid: FirebaseAuth.instance.currentUser!.uid,
+            id: const Uuid().v4(),
+            titulo: _tituloController.text,
+            descricao: _descricaoController.text,
+            dataCriacao: DateTime.now()
           );
-        },
-        child: Text(widget.taskId == null ? "Criar" : "Salvar"),
-      ),
+
+          await box.put(newTask.id, newTask);
+        } else {
+          // Atualizar tarefa existente
+          final task = box.get(widget.taskId);
+          if (task != null) {
+            task.titulo = _tituloController.text;
+            task.descricao = _descricaoController.text;
+            await task.save();
+
+            showSnackbar(message: "Tarefa atualizada com sucesso!", context: context);
+          }
+        }
+
+        // Volta para Home
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const Home()),
+        );
+      },
+      title: widget.taskId == null ? "Criar" : "Salvar"
     );
   }
 }

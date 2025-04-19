@@ -182,22 +182,38 @@ class _HomeState extends State<Home> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Icon(
-          task.concluida ? Icons.check_circle : Icons.circle_outlined,
+        leading: IconButton(
+          icon: Icon(
+            task.concluida ? Icons.check_circle : Icons.circle_outlined,
+          ),
           color: task.concluida ? Colors.black : Colors.grey,
+          onPressed: () {
+            setState(() {
+              task.concluida = !task.concluida;
+              task.save();
+            });
+          },
         ),
         title: Text(task.titulo),
         subtitle: Text(task.descricao),
-        trailing: Icon(
-          task.favorita ? Icons.star : Icons.star_border,
+        trailing: IconButton(
+          icon: Icon(
+            task.favorita ? Icons.star : Icons.star_border,
+          ),
           color: task.favorita ? Colors.black : Colors.grey,
+          onPressed: () {
+            setState(() {
+              task.favorita = !task.favorita;
+              task.save();
+            });
+          },
         ),
         onTap: () {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (BuildContext context) => ViewTask(taskId: task.id)
-            )
+              builder: (BuildContext context) => ViewTask(taskId: task.id),
+            ),
           );
         },
       ),
