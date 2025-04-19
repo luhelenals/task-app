@@ -2,6 +2,9 @@
 
 Um aplicativo de gerenciamento de tarefas desenvolvido em Flutter, com autenticação via Firebase, sincronização em tempo real e persistência local com Hive.
 
+### Preview
+https://github.com/user-attachments/assets/8eff8722-b9a8-49c2-8ce8-f7381b6d87f9
+
 ## ✨ Funcionalidades
 
 - 📌 **Adicionar, visualizar e editar tarefas**
