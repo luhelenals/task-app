@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive/hive.dart';
 import 'package:task_app/models/task_model.dart';
 import 'package:task_app/pages/home.dart';
+import 'package:task_app/services/task_service.dart';
 import 'package:task_app/utils/button_helper.dart';
 import 'package:task_app/utils/snackbar_helper.dart';
 import 'package:uuid/uuid.dart';
@@ -23,6 +23,7 @@ class _ViewTaskState extends State<ViewTask> {
   final String uid = FirebaseAuth.instance.currentUser!.uid;
 
   bool isLoading = true;
+  final TaskService _taskService = TaskService(); // Instanciando o TaskService
 
   @override
   void initState() {
@@ -35,14 +36,16 @@ class _ViewTaskState extends State<ViewTask> {
   }
 
   Future<void> _loadTaskData() async {
-    var box = await Hive.openBox<Task>('tasks');
+    try {
+      // Se a taskId não for nula, carrega os dados da tarefa
+      Task? task = await _taskService.getTaskById(widget.taskId!);
 
-    // Supondo que a taskId seja a key usada no Hive (ex: int ou String)
-    final task = box.get(widget.taskId);
-
-    if (task != null) {
-      _tituloController.text = task.titulo;
-      _descricaoController.text = task.descricao;
+      if (task != null) {
+        _tituloController.text = task.titulo;
+        _descricaoController.text = task.descricao;
+      }
+    } catch (e) {
+      showSnackbar(message: "Erro ao carregar dados: $e", context: context);
     }
 
     setState(() {
@@ -89,9 +92,7 @@ class _ViewTaskState extends State<ViewTask> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          widget.taskId == null
-                              ? 'Nova Tarefa'
-                              : 'Editar Tarefa',
+                          widget.taskId == null ? 'Nova Tarefa' : 'Editar Tarefa',
                           style: GoogleFonts.raleway(
                             textStyle: const TextStyle(
                               color: Colors.black,
@@ -174,16 +175,18 @@ class _ViewTaskState extends State<ViewTask> {
         onPressed: () async {
           if (widget.taskId == null) return;
 
-          final box = await Hive.openBox<Task>('tasks');
+          try {
+            await _taskService.deleteTask(widget.taskId!);
 
-          await box.delete(widget.taskId);
+            showSnackbar(message: "Tarefa apagada com sucesso!", context: context);
 
-          showSnackbar(message: "Tarefa apagada com sucesso!", context: context);
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const Home()),
-          );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const Home()),
+            );
+          } catch (e) {
+            showSnackbar(message: "Erro ao apagar a tarefa: $e", context: context);
+          }
         },
       ),
     );
@@ -192,28 +195,34 @@ class _ViewTaskState extends State<ViewTask> {
   Widget _salvar(BuildContext context) {
     return ElevatedButtonHelper(
       onPressed: () async {
-        final box = await Hive.openBox<Task>('tasks');
-
         if (widget.taskId == null) {
           // Criar nova tarefa
-          final newTask = Task(
-            uid: FirebaseAuth.instance.currentUser!.uid,
-            id: const Uuid().v4(),
-            titulo: _tituloController.text,
-            descricao: _descricaoController.text,
-            dataCriacao: DateTime.now()
-          );
-
-          await box.put(newTask.id, newTask);
+          try {
+            await _taskService.createTask(
+              context: context,
+              titulo: _tituloController.text,
+              descricao: _descricaoController.text,
+              uid: FirebaseAuth.instance.currentUser!.uid,
+            );
+          } catch (e) {
+            showSnackbar(message: "Erro ao criar tarefa: $e", context: context);
+          }
         } else {
           // Atualizar tarefa existente
-          final task = box.get(widget.taskId);
-          if (task != null) {
-            task.titulo = _tituloController.text;
-            task.descricao = _descricaoController.text;
-            await task.save();
+          try {
+            final task = Task(
+              id: widget.taskId!,
+              uid: FirebaseAuth.instance.currentUser!.uid,
+              titulo: _tituloController.text,
+              descricao: _descricaoController.text,
+              dataCriacao: DateTime.now(),
+            );
+
+            await _taskService.updateTask(task);
 
             showSnackbar(message: "Tarefa atualizada com sucesso!", context: context);
+          } catch (e) {
+            showSnackbar(message: "Erro ao atualizar tarefa: $e", context: context);
           }
         }
 
@@ -223,7 +232,7 @@ class _ViewTaskState extends State<ViewTask> {
           MaterialPageRoute(builder: (_) => const Home()),
         );
       },
-      title: widget.taskId == null ? "Criar" : "Salvar"
+      title: widget.taskId == null ? "Criar" : "Salvar",
     );
   }
 }

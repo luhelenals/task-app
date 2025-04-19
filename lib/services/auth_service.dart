@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:task_app/pages/home.dart';
 import 'package:task_app/pages/login.dart';
+import 'package:task_app/services/task_service.dart';
 import 'package:task_app/utils/snackbar_helper.dart';
 
 class AuthService {
@@ -37,7 +38,7 @@ class AuthService {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (BuildContext context) => const Home()
+          builder: (BuildContext context) => Login()
         )
       );
 
@@ -71,6 +72,10 @@ class AuthService {
       );
 
       await Future.delayed(const Duration(seconds: 1));
+
+      // Sincronizar tasks com Firebase
+      await TaskService().syncTasksFromFirebase(FirebaseAuth.instance.currentUser!.uid);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

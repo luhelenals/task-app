@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:task_app/pages/view_task.dart';
+import 'package:task_app/services/task_service.dart';
 import '../models/task_model.dart';
-import '../services/task_service.dart';
 import '../services/auth_service.dart';
 
 class Home extends StatefulWidget {
@@ -15,6 +16,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final TaskService _taskService = TaskService();
+  late Box<Task> taskBox = initTaskBox() as Box<Task>; 
+  
+  Future<Box<Task>> initTaskBox() async {
+    return await Hive.openBox<Task>('tasks');
+  }
+
   List<Task>? _filteredTasks;
   bool _isFiltered = false;
   late final String uid;
@@ -23,6 +30,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     uid = FirebaseAuth.instance.currentUser!.uid;
+    TaskService().syncTasksFromFirebase(uid);
   }
 
   @override
@@ -189,11 +197,14 @@ class _HomeState extends State<Home> {
             task.concluida ? Icons.check_circle : Icons.circle_outlined,
           ),
           color: task.concluida ? Colors.black : Colors.grey,
-          onPressed: () {
+          onPressed: () async {
             setState(() {
               task.concluida = !task.concluida;
-              task.save();
             });
+
+            // Atualiza a tarefa no Hive e no Firestore
+            await _taskService.updateTask(task); // Atualizando no Firestore
+            await taskBox.put(task.id, task); // Atualizando no Hive
           },
         ),
         title: Text(task.titulo),
@@ -203,11 +214,14 @@ class _HomeState extends State<Home> {
             task.favorita ? Icons.star : Icons.star_border,
           ),
           color: task.favorita ? Colors.black : Colors.grey,
-          onPressed: () {
+          onPressed: () async {
             setState(() {
               task.favorita = !task.favorita;
-              task.save();
             });
+
+            // Atualiza a tarefa no Hive e no Firestore
+            await _taskService.updateTask(task); // Atualizando no Firestore
+            await taskBox.put(task.id, task); // Atualizando no Hive
           },
         ),
         onTap: () {
